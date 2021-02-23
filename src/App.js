@@ -1,25 +1,95 @@
-import logo from './logo.svg';
+import React from "react";
+import 'semantic-ui-css/semantic.min.css'
 import './App.css';
+import Home from "./screens/Home"
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Link,
+  Redirect
+} from "react-router-dom";
 
-function App() {
+class App extends React.Component {
+  constructor(props) {
+    super(props)
+
+    this.state = {
+      auth: null
+    }
+  }
+
+  render() {
+    return (
+      <Router>
+        <div>
+          <nav>
+            <ul>
+              <li>
+                <Link to="/">Home</Link>
+              </li>
+              <li>
+                <Link to="/games">Games</Link>
+              </li>
+              <li>
+                <Link to="/profile">Profile</Link>
+              </li>
+            </ul>
+          </nav>
+  
+          {/* A <Switch> looks through its children <Route>s and
+              renders the first one that matches the current URL. */}
+          <Switch>
+            <Route render={({ location }) =>
+              this.checkLogin(location, <Games auth={this.state.auth} />)
+            } path="/games">
+            </Route>
+            <Route path="/profile">
+              <Profile />
+            </Route>
+            <Route path="/">
+              <Home auth={this.state.auth} onLogin={auth => this.setState({auth: auth})} />
+            </Route>
+          </Switch>
+        </div>
+      </Router>
+    );
+  }
+
+  checkLogin(location, children) {
+    console.log("LOC", location)
+    if(this.state.auth) {
+      return children
+    } else {
+      return (
+        <Redirect
+          to={{
+            pathname: "/",
+            state: { from: location }
+          }}
+        />
+      )
+    }
+  }
+}
+
+export default App
+
+/*
+function Home(props) {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <h2>Home</h2>
+      <button onClick={() => props.onLogin({name:"Meryyyy", id: 33})}>LOGIN !</button>
     </div>
   );
 }
+*/
 
-export default App;
+function Profile() {
+  return <h2>Profile</h2>;
+}
+
+function Games(props) {
+  return <h2>Games ! Hello, {props.auth ? props.auth.name : null}</h2>;
+}
