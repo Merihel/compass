@@ -3,6 +3,7 @@ const ApiService = require("moleculer-web");
 
 const MathService = require("./math.service")
 const BotService = require("./bot.service")
+const UserService = require("./user.service")
 // Create a ServiceBroker
 const MainBroker = new ServiceBroker({
     nodeID: "server-1",
@@ -18,6 +19,8 @@ const MainBroker = new ServiceBroker({
 //Service call
 MainBroker.createService(MathService)
 MainBroker.createService(BotService)
+MainBroker.createService(UserService)
+
 MainBroker.createService({
     mixins: [ApiService],
     settings: {
@@ -47,6 +50,10 @@ MainBroker.createService({
     }
 })
 
+
 // Start the broker
 MainBroker.start()
+    .then(res => {
+        MainBroker.call("bot.start")
+    })
     .catch(err => console.error(`Error occured! ${err.message}`));
