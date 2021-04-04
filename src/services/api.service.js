@@ -1,5 +1,8 @@
 const ApiGateway = require("moleculer-web");
 const E = require("moleculer-web").Errors;
+const LG = require("../utils/Logger")
+const LOGGER = new LG("API")
+
 
 const service = {
     name: "api",
@@ -32,7 +35,7 @@ const service = {
 			// Enable authentication. Implement the logic into `authenticate` method. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Authentication
 			authentication: false,
 			// Enable authorization. Implement the logic into `authorize` method. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Authorization
-			authorization: false,
+			authorization: true,
 			// The auto-alias feature allows you to declare your route alias directly in your services.
 			// The gateway will dynamically build the full routes from service schema.
 			autoAliases: true,
@@ -84,13 +87,11 @@ const service = {
 				try {
 					user = await ctx.call("user.resolveToken", { token });
 					if (user) {
-						console.log("Authenticated via JWT: ", user.login);
+						LOGGER.log("Authorized via JWT: " + user.login);
 						// Reduce user fields (it will be transferred to other nodes)
-						ctx.meta.user = {
-							id: user.id,
-							login: user.login,
-							discord_id: user.discord_id,
-						}
+						user.password = null
+						user.bio = null
+						ctx.meta.user = user
 						ctx.meta.token = token;
 						ctx.meta.userId = user.id;
                         /*
@@ -121,7 +122,7 @@ const service = {
 			}
 			if (!user && (req.$action.authorization || req.$action.authorization == null))
 				throw new E.UnAuthorizedError();
-		}
+		},
     }
 }
 

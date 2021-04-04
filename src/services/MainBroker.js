@@ -1,3 +1,4 @@
+require('dotenv').config()
 const { ServiceBroker } = require("moleculer");
 const AuthService = require("./auth.service")
 const MathService = require("./math.service")

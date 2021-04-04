@@ -4,6 +4,10 @@ const LG = require("../utils/Logger")
 const Utils = require("../utils/Utils")
 const LOGGER = new LG("BOT")
 const client = new Discord.Client()
+//ALL BOT COMMANDS
+const MathCommand = require("./bot-commands/MathCommand")
+const RegisterCommand = require("./bot-commands/RegisterCommand")
+const AccountCommand = require("./bot-commands/AccountCommand")
 let context = null
 
 const service = {
@@ -44,7 +48,7 @@ client.once('disconnect', () => {
 
 async function callService(serv, args = null, callback = null) {
     await context.call(serv, args).then(res => {
-        LOGGER.log("callService res", res)
+        //LOGGER.log("callService res", res)
         return callback ? callback(res) : res
     })
 }
@@ -100,45 +104,15 @@ client.on('message', async message => {
     //const serverQueue = queue.get(message.guild.id);
 
     if (message.content.startsWith(`${pre}math`)) {
-        const msg = message.content
-        let a,b = null
-        if(msg.includes("+")) {
-            a = msg.split("!math")[1].split("+")[0]
-            b = msg.split("!math")[1].split("+")[1]
-            callService("math.add", {a:a,b:b}, (res) => {
-                if(isNaN(res)) {
-                    message.channel.send("Only one operator is supported");
-                } else {
-                    message.channel.send(res);
-                }
-            })
-            
-        } else if (msg.includes("-")) {
-            a = msg.split("!math")[1].split("-")[0]
-            b = msg.split("!math")[1].split("-")[1]
-            callService("math.substract", {a:a,b:b}, (res) => {
-                if(isNaN(res)) {
-                    message.channel.send("Only one operator is supported");
-                } else {
-                    message.channel.send(res);
-                }
-            })
-        } else if (msg.includes("/")) {
-            a = msg.split("!math")[1].split("/")[0]
-            b = msg.split("!math")[1].split("/")[1]
-            callService("math.divide", {a:a,b:b}, (res) => {
-                if(isNaN(res)) {
-                    message.channel.send("Only one operator is supported");
-                } else {
-                    message.channel.send(res);
-                }
-            })
-        } else {
-            message.channel.send("Invalid operation");
-        }
+        const mathCommand = new MathCommand()
+        mathCommand.onReceiveMessage(message, (serv, args, callback) => callService(serv, args, callback))
     } else if (message.content.startsWith(`${pre}register`)) {
-        await registerUser(message)
-    } else if (message.content.startsWith(`${pre}clear`)) {
+        const registerCommand = new RegisterCommand()
+        await registerCommand.onReceiveMessage(message, (serv, args, callback) => callService(serv, args, callback))
+    } else if (message.content.startsWith(`${pre}account`)) {
+        const accountCommand = new AccountCommand()
+        await accountCommand.onReceiveMessage(message, (serv, args, callback) => callService(serv, args, callback))
+    } else if (message.content.startsWith(`${pre}clear`) || message.content.startsWith(`${pre}clean`)) {
         //TODO PERMISSION CHECK
         // Clear all messages
         message.channel.bulkDelete(100)
@@ -147,7 +121,9 @@ client.on('message', async message => {
                 LOGGER.error(error)
                 message.react("❌")
             });
-    } else if(message.content.startsWith(`${pre}connect`)) {
+    } else  {
+        message.react("❓")
+    } /*else if(message.content.startsWith(`${pre}connect`)) {
         let member = message.member
         let pass = message.content.split("!connect ")[1]
         if(pass) {
@@ -169,10 +145,7 @@ client.on('message', async message => {
             message.react("❌")
         }
         
-    } else  {
-        //const questionMarkEmoji = client.emojis.find(emoji => emoji.name === "question");
-        message.react("❓")
-    }
+    }*/ 
 })
 
 

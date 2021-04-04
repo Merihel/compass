@@ -1,4 +1,5 @@
 const bcrypt = require("bcrypt")
+const Discord = require("discord.js")
 
 const utils = {
     salt(password) {
@@ -18,7 +19,25 @@ const utils = {
             retVal += charset.charAt(Math.floor(Math.random() * n));
         }
         return retVal;
+    },
+    validateEmail(email) {
+        const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(email);
+    },
+    messageEmbedBuilder(params) {
+        return new Discord.MessageEmbed(params)
+    },
+    errorEmbedBuilder(error, errorMessage = "Une erreur est survenue. Tu peux copier l'erreur pour en informer un Modérateur.") {
+        const errorEmbed = new Discord.MessageEmbed()
+            .setTitle("Désolé, mais...")
+            .setColor("#ff0000")
+            .setDescription(errorMessage)
+            .addFields(
+                { name: 'Erreur', value: error }
+            )
+        return errorEmbed
     }
+
 }
 
 module.exports = utils
