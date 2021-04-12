@@ -36,6 +36,16 @@ class MathCommand extends AbstractCommand {
                     message.channel.send(res);
                 }
             })
+        } else if (msg.includes("*")) {
+            a = msg.split("!math")[1].split("*")[0]
+            b = msg.split("!math")[1].split("*")[1]
+            callService("math.multiply", {a:a,b:b}, (res) => {
+                if(isNaN(res)) {
+                    message.channel.send("Only one operator is supported");
+                } else {
+                    message.channel.send(res);
+                }
+            })
         } else {
             message.channel.send("Invalid operation");
         }

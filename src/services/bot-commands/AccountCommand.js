@@ -35,9 +35,7 @@ class RegisterCommand extends AbstractCommand {
                             dbUser = res[0]
                         }
                     }).catch(() => {console.log("Oups, not found....")})
-                    const updatedAt = new Date(dbUser.updatedAt).getTime()
-                    const now = Date.now()
-                    //console.log(diff_minutes(updatedAt, now))
+                    //TODO TIME CHECK
                     await callService("user.update", {id: dbUser.id, bio: bio}, (res) => {
                         LOGGER.log("User updated !")
                         const response = new Discord.MessageEmbed()

@@ -1,5 +1,6 @@
 require('dotenv').config()
 const { ServiceBroker } = require("moleculer");
+const BrokerService = require("./broker.service")
 const AuthService = require("./auth.service")
 const MathService = require("./math.service")
 const BotService = require("./bot.service")
@@ -19,6 +20,7 @@ const MainBroker = new ServiceBroker({
 })
 
 //Service call
+MainBroker.createService(BrokerService)
 MainBroker.createService(AuthService)
 MainBroker.createService(MathService)
 MainBroker.createService(BotService)

@@ -1,4 +1,6 @@
 const Utils = require("../utils/Utils")
+const LG = require("../utils/Logger")
+const LOGGER = new LG("AUTH")
 const jwt = require("jsonwebtoken");
 //errors
 const { MoleculerClientError } = require("moleculer").Errors;
@@ -27,16 +29,22 @@ const service = {
 			},
 			authorization: false,
 			async handler(ctx) {
-				const { email, password } = ctx.params;
-				const user = await context.call("users.find", { email })
-				if (!user) throw new MoleculerClientError("Email or password is invalid!", 422, "", [{ field: "email", message: "is not found" }]);
-                const res = await Utils.compare(password, user.password)
-                if (!res) throw new MoleculerClientError("Wrong password!", 422, "", [{ field: "email", message: "is not found" }]);
-				let expiresIn = "1h"
-                return {
-					token: jwt.sign({id: user.id}, this.settings.JWT_SECRET, {expiresIn: expiresIn}),
-					expiresIn: expiresIn
+				try {
+					const { email, password } = ctx.params;
+					const user = await ctx.call("users.find", { email })
+					if (!user) throw new MoleculerClientError("Email or password is invalid!", 422, "", [{ field: "email", message: "is not found" }]);
+					const res = await Utils.compare(password, user.password)
+					if (!res) throw new MoleculerClientError("Wrong password!", 422, "", [{ field: "email", message: "is not found" }]);
+					let expiresIn = "24h"
+					return {
+						token: jwt.sign({id: user.id}, this.settings.JWT_SECRET, {expiresIn: expiresIn}),
+						expiresIn: expiresIn
+					}
+				} catch(e) {
+					LOGGER.error(e)
+					return null
 				}
+				
 			}
 		},
         /**

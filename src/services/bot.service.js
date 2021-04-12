@@ -1,13 +1,15 @@
 const Discord = require("discord.js")
-const {token, pre} = require("../../config.json")
+const {pre} = require("../../config.json")
 const LG = require("../utils/Logger")
 const Utils = require("../utils/Utils")
+const DateUtil = require("../utils/Date")
 const LOGGER = new LG("BOT")
 const client = new Discord.Client()
 //ALL BOT COMMANDS
 const MathCommand = require("./bot-commands/MathCommand")
 const RegisterCommand = require("./bot-commands/RegisterCommand")
 const AccountCommand = require("./bot-commands/AccountCommand")
+
 let context = null
 
 const service = {
@@ -15,13 +17,13 @@ const service = {
     actions: {
         async start(ctx) {
             context = ctx
-            await client.login(token)
+            await client.login(process.env.BOT_TOKEN)
             return true
         },
         async restart(ctx) {
             context = ctx
             await client.destroy()
-            await client.login(token)
+            await client.login(process.env.BOT_TOKEN)
             LOGGER.info("Bot restarted!")
             return true
         },
@@ -53,40 +55,6 @@ async function callService(serv, args = null, callback = null) {
     })
 }
 
-async function registerUser(message) {
-    const member = await message.member
-    const user = await message.author
-    const dmChannel = await member.createDM()
-    callService("user.existsByDiscordId", {
-        discord_id: member.id
-    }, async (res) => {
-        //LOGGER.log("Does "+member.displayName+" exists in db ?", res)
-        if(!res.data.exists) {
-            await dmChannel.send("Hey ! Merci de vouloir t'inscrire au serveur ! Je t'ajoute et te prépare un mot de passe tout frais (pas de panique, tu pourras le modifier plus tard).\nJuste une minute...").catch(error => {
-                if(error.code == 50007) {
-                    message.channel.send("Oups, on dirait que tu ne peux pas encore recevoir mes MP, revois tes paramètres de confidentialité et retente à nouveau !")
-                    return
-                } 
-            })
-            dmChannel.startTyping()
-            let clearPassword = Utils.generatePass()
-            callService("user.create", {
-                login: member.displayName,
-                tag: user.tag,
-                email: null,
-                discord_id: member.id,
-                bio: null,
-                clearPassword: clearPassword
-            }, (res) => {
-                LOGGER.log("User registered !")
-                dmChannel.stopTyping()
-                dmChannel.send("Ton inscription est bien validée ! Voici ton mot de passe provisoire: `" + clearPassword + "`, il te sera demandé de le changer à ta première connexion")
-            })
-        } else {
-            message.channel.send(`Tu existes déjà dans notre base de données, ${member}`)
-        }
-    })
-}
 
 // Create an event listener for new guild members
 client.on('guildMemberAdd',async member => {
@@ -98,9 +66,53 @@ client.on('guildMemberAdd',async member => {
     // Send the message, mentioning the member
 });
 
+updateUser = async (message) => {
+    let dbUser = null 
+    let doUpdate = false
+    const member = await message.member
+    const user = await message.author
+    await callService("user.find", {query: {discord_id: member.id}}, async (res) => {
+        if(res) {
+            if(DateUtil.compareWithNow(res[0].updatedAt) > 30) {
+                doUpdate = true
+                dbUser = res[0]
+            } else {
+                LOGGER.log("Not updating user since last update is from less than 1 minute")
+            }
+        }
+    }).catch((e) => {LOGGER.error(e)})
+    if(dbUser && doUpdate) {
+        await callService("user.update", {id: dbUser.id, login: member.displayName, tag:user.tag, updatedAt: Date.now()}, async (res) => {
+            if(res) {
+                LOGGER.log("Updated user "+member.id)
+            }
+        }).catch(e => {
+            LOGGER.error(e)
+        }) 
+    }
+}
+
+notCommand = (message) => {
+    if (message.content.includes("feur") || message.content.includes("Feur") || message.content.includes("test") ) {
+        message.channel.messages.fetch({limit: 2})
+        .then(messageMappings => {
+            let messages = Array.from(messageMappings.values());
+            let previousMessage = messages[1];
+            if(previousMessage.content.endsWith("uoi") || previousMessage.content.endsWith("uoi ?") || previousMessage.content.endsWith("uoi?")) {
+                message.channel.send(`Oh il t'as détruit ! :joy:`)
+            }
+        })
+        .catch(error => Logger.error("error", "Error fetching messages in channel"))
+    }
+}
+
 client.on('message', async message => {
-    if (message.author.bot || !message.content.startsWith(pre)) return
+    if (message.author.bot || !message.content.startsWith(pre)) {
+        notCommand(message)
+        return
+    }
     LOGGER.info("Bot command by "+message.member.displayName+ " ("+message.member.id+") => "+message.content)
+    updateUser(message)
     //const serverQueue = queue.get(message.guild.id);
 
     if (message.content.startsWith(`${pre}math`)) {
@@ -121,7 +133,7 @@ client.on('message', async message => {
                 LOGGER.error(error)
                 message.react("❌")
             });
-    } else  {
+    } else {
         message.react("❓")
     } /*else if(message.content.startsWith(`${pre}connect`)) {
         let member = message.member
