@@ -2,6 +2,8 @@ import React from "react";
 import 'semantic-ui-css/semantic.min.css'
 import './App.css';
 import Home from "./screens/Home"
+import Account from "./screens/Account"
+import AuthServiceRequest from "./requests/AuthServiceRequest"
 import {
   BrowserRouter as Router,
   Switch,
@@ -32,7 +34,7 @@ class App extends React.Component {
                 <Link to="/games">Games</Link>
               </li>
               <li>
-                <Link to="/profile">Profile</Link>
+                <Link to="/account">Account</Link>
               </li>
             </ul>
           </nav>
@@ -45,7 +47,7 @@ class App extends React.Component {
             } path="/games">
             </Route>
             <Route path="/profile">
-              <Profile />
+              <Account />
             </Route>
             <Route path="/">
               <Home auth={this.state.auth} onLogin={auth => this.setState({auth: auth})} />
@@ -56,8 +58,9 @@ class App extends React.Component {
     );
   }
 
-  checkLogin(location, children) {
-    console.log("LOC", location)
+  async checkLogin(location, children) {
+    
+    
     if(this.state.auth) {
       return children
     } else {
@@ -85,10 +88,6 @@ function Home(props) {
   );
 }
 */
-
-function Profile() {
-  return <h2>Profile</h2>;
-}
 
 function Games(props) {
   return <h2>Games ! Hello, {props.auth ? props.auth.name : null}</h2>;

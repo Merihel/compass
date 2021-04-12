@@ -14,7 +14,6 @@ const service = {
             return Number(ctx.params.a) / Number(ctx.params.b);
         },
         info(ctx) {
-            console.log(ctx.params)
             switch (parseInt(ctx.params.idinfo)) {
                 case 0:
                     return "C'est le 0, chiffre nul le plus connu"
