@@ -1,14 +1,16 @@
 const Discord = require("discord.js")
-const {pre} = require("../../config.json")
+const {pre, guildId} = require("../../config.json")
 const LG = require("../utils/Logger")
 const Utils = require("../utils/Utils")
 const DateUtil = require("../utils/Date")
 const LOGGER = new LG("BOT")
 const client = new Discord.Client()
 //ALL BOT COMMANDS
-const MathCommand = require("./bot-commands/MathCommand")
-const RegisterCommand = require("./bot-commands/RegisterCommand")
-const AccountCommand = require("./bot-commands/AccountCommand")
+const MathCommand = require("./bot/MathCommand")
+const RegisterCommand = require("./bot/RegisterCommand")
+const AccountCommand = require("./bot/AccountCommand")
+//Bot controllers
+const RulesController = require("./bot/RulesController")
 
 let context = null
 
@@ -35,6 +37,55 @@ const service = {
         }
     }
 }
+
+/*
+* @deprecated 
+*/
+function checkReactionsFromRulesServer() {
+    client.guilds.fetch(guildId).then(guild => {
+        client.channels.fetch(guild.rulesChannelID).then(rulesChannel => {
+            rulesChannel.messages.fetch(rulesChannel.lastMessageID).then(message => {
+                if(message) {
+                    console.log("Successfully loaded rules's channel message")
+                    let flagContains = false
+                    message.reactions.removeAll().then(() => {
+                        message.reactions.cache.forEach(it => {
+                            if(it._emoji.name == "👍") flagContains = true
+                        })
+                    })
+                   
+                    if(!flagContains) {
+                        message.react('👍')
+                    }
+                }
+            }).catch(e => {
+                LOGGER.error("Couldn't fetch rules's channel message. Rules validation will not work !" + e)
+            })
+        }).catch(e => {
+            LOGGER.error("Couldn't get rules channel: " + e)
+        })
+    }).catch(e => {
+        LOGGER.error("Error couldn't fetch Guild ! Is guildId present in config file ? " + e)
+    })
+}
+
+client.on('messageReactionAdd', async (reaction, user) => {
+	/*
+    if(reaction.message.channel.id == reaction.message.guild.rulesChannelID) {
+        const controller = new RulesController()
+        controller.onRuleMessageReaction(reaction, user)
+    } else {
+        console.log("Reaction collected, not in rules channel")
+    }
+    
+    
+    console.log(reaction.message.channel.id == reaction.message.channel.guild.rulesChannelID)
+	// Now the message has been cached and is fully available
+	console.log(`${reaction.message.author}'s message "${reaction.message.content}" gained a reaction!`);
+	// The reaction is now also fully available and the properties will be reflected accurately:
+	console.log(`${reaction.count} user(s) have given the same reaction to this message!`);
+    */
+});
 
 client.once('ready', () => {
     LOGGER.info("Bot ready !")

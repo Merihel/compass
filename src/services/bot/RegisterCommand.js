@@ -71,10 +71,10 @@ class RegisterCommand extends AbstractCommand {
                                     await callService("user.authenticate", {email: email, password: clearPassword}, async (auth) => {
                                         const link = process.env.HTTP+process.env.HOST+":"+process.env.WEB_PORT+"/account?"+"token="+auth.token
                                         const mailSent = await Mail.send({
-                                            from: '"'+this.config.serverName+'" <'+process.env.MAIL_ID+'>', // sender address
+                                            from: '"'+this.config.guildName+'" <'+process.env.MAIL_ID+'>', // sender address
                                             to: email, // list of receivers
-                                            subject: "Ton inscription à Compass 🧭 via "+this.config.serverName,
-                                        }, member.displayName, this.config.serverName, link)
+                                            subject: "Ton inscription à Compass 🧭 via "+this.config.guildName,
+                                        }, member.displayName, this.config.guildName, link)
                                         if(mailSent === true) {
                                             const response = Utils.messageEmbedBuilder({
                                                 title: "👍 OK !",
