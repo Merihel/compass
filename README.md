@@ -52,9 +52,10 @@ As frontend framework
 
 	**DB_HOST** *(db config)* the database host  
 
-4. Add a `config.json` at the root of the project with an object containing following key/values :
-		**pre** the Discord bot command prefixe  
+4. Add a `config.json` at the root of the project with an object containing following key/values :  
 
-		**guildName** the Discord guild name  
+	**pre** the Discord bot command prefixe  
 
-		**guildId** the Discord guild id  
+    **guildName** the Discord guild name  
+
+	**guildId** the Discord guild id  
