@@ -9,16 +9,14 @@ const { MoleculerClientError } = require("moleculer").Errors;
 const LG = require("../utils/Logger")
 const LOGGER = new LG("USER")
 const Utils = require("../utils/Utils");
+const DB = require("../utils/DB");
 const Date = require("../utils/Date");
 const { decode } = require("utf8");
 
 const service = {
     name: "user",
     mixins: [DbService],
-    adapter: new SqlAdapter('compass', 'root', '', {
-        host: 'localhost',
-        dialect: 'mysql'
-    }),
+    adapter: DB.getSQLAdapter(),
     settings: {
         JWT_SECRET: process.env.JWT_SECRET || "DEFAULT_JWT_SECRET",
     },
