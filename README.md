@@ -19,37 +19,38 @@ As frontend framework
 
 **Semantic UI**
  A lib for frontend UI  
- 
+
 ## To work with Compass
 
  1. Clone repo
  2. `npm install` or `yarn` to install Node dependencies
- 3. To the root of the project, add a `.env` file with following content :
-		**JWT_SECRET**  a secret key for the JWT  
+ 3. To the root of the project, add a `.env` file with following content :  
 
-		**BOT_TOKEN** your discord bot token (see https://discord.com/developers/applications)  
+    **JWT_SECRET**  a secret key for the JWT  
 
-		**HTTP** *(for website)* a value between `http://` and `https://`  
+	**BOT_TOKEN** your discord bot token (see https://discord.com/developers/applications)  
 
-		**HOST** *(for website)* the host (ip or domain name)  
+	**HTTP** *(for website)* a value between `http://` and `https://`  
 
-		**WEB_PORT** *(for website)* the port in use  
+	**HOST** *(for website)* the host (ip or domain name)  
 
-		**MAIL_HOST** *(mail config)* the host of the mail server  
+	**WEB_PORT** *(for website)* the port in use  
 
-		**MAIL_PORT** *(mail config)* the port of the SMTP  
+	**MAIL_HOST** *(mail config)* the host of the mail server  
 
-		**MAIL_ID** *(mail config)* the mail account identifier  
+	**MAIL_PORT** *(mail config)* the port of the SMTP  
 
-		**MAIL_PASS** *(mail config)* the mail account pass  
+	**MAIL_ID** *(mail config)* the mail account identifier  
 
-		**DB_NAME** *(db config)* the database schema name (database loaded on DB_HOST, port 3306)  
+	**MAIL_PASS** *(mail config)* the mail account pass  
 
-		**DB_USER** *(db config)* the database username  
+	**DB_NAME** *(db config)* the database schema name (database loaded on DB_HOST, port 3306)  
 
-		**DB_PASS** *(db config)* the database password  
+	**DB_USER** *(db config)* the database username  
 
-		**DB_HOST** *(db config)* the database host  
+	**DB_PASS** *(db config)* the database password  
+
+	**DB_HOST** *(db config)* the database host  
 
 4. Add a `config.json` at the root of the project with an object containing following key/values :
 		**pre** the Discord bot command prefixe  
