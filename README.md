@@ -59,3 +59,12 @@ As frontend framework
     **guildName** the Discord guild name  
 
 	**guildId** the Discord guild id  
+
+	**roles** An array containing roles. Roles are object with following properties:
+
+	    name: The name of the role
+
+    	id: The discord id of the role
+
+    	level:  The level of permission. It starts at lowest role with 0. 
+    	Commands are limited for each role and need the sufficient level to be executed.

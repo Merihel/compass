@@ -3,6 +3,7 @@ const {pre, guildId} = require("../../config.json")
 const LG = require("../utils/Logger")
 const Utils = require("../utils/Utils")
 const DateUtil = require("../utils/Date")
+const RoleManager = require("../utils/RoleManager")
 const LOGGER = new LG("BOT")
 const client = new Discord.Client()
 //ALL BOT COMMANDS
@@ -143,8 +144,8 @@ updateUser = async (message) => {
     }
 }
 
-notCommand = (message) => {
-    if (message.content.includes("feur") || message.content.includes("Feur") || message.content.includes("test") ) {
+notCommand = (message) => { //yeah this is an easter egg for my friend Moon...
+    if (message.content.includes("feur") || message.content.includes("Feur")) {
         message.channel.messages.fetch({limit: 2})
         .then(messageMappings => {
             let messages = Array.from(messageMappings.values());
@@ -157,26 +158,44 @@ notCommand = (message) => {
     }
 }
 
+roleChecker = (message, checkedRole) => {
+    if(checkedRole.result) {
+        return true
+    } else {
+        message.react("⛔")
+        return false
+    }
+}
+
 client.on('message', async message => {
     if (message.author.bot || !message.content.startsWith(pre)) {
         notCommand(message)
         return
     }
-    LOGGER.info("Bot command by "+message.member.displayName+ " ("+message.member.id+") => "+message.content)
+
     updateUser(message)
-    //const serverQueue = queue.get(message.guild.id);
+
+    const memberTopRole = RoleManager.getHighestRoleFromDiscordMember(message.member)
+    LOGGER.info("Bot command by "+message.member.displayName+ " ("+message.member.id+" with role '"+memberTopRole.name+"') => "+message.content)
 
     if (message.content.startsWith(`${pre}math`)) {
+        const checkedRole = RoleManager.checkRole(memberTopRole.id, 3)
+        if(!roleChecker(message, checkedRole)) return
         const mathCommand = new MathCommand()
         mathCommand.onReceiveMessage(message, (serv, args, callback) => callService(serv, args, callback))
     } else if (message.content.startsWith(`${pre}register`)) {
+        const checkedRole = RoleManager.checkRole(memberTopRole.id, 1)
+        if(!roleChecker(message, checkedRole)) return
         const registerCommand = new RegisterCommand()
         await registerCommand.onReceiveMessage(message, (serv, args, callback) => callService(serv, args, callback))
     } else if (message.content.startsWith(`${pre}account`)) {
+        const checkedRole = RoleManager.checkRole(memberTopRole.id, 1)
+        if(!roleChecker(message, checkedRole)) return
         const accountCommand = new AccountCommand()
         await accountCommand.onReceiveMessage(message, (serv, args, callback) => callService(serv, args, callback))
     } else if (message.content.startsWith(`${pre}clear`) || message.content.startsWith(`${pre}clean`)) {
-        //TODO PERMISSION CHECK
+        const checkedRole = RoleManager.checkRole(memberTopRole.id, 3)
+        if(!roleChecker(message, checkedRole)) return
         // Clear all messages
         message.channel.bulkDelete(100)
             .then(messages => LOGGER.log(`Bulk delete - Succesfully deleted ${messages.size} messages`))
