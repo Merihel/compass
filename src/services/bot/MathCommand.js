@@ -12,6 +12,10 @@ class MathCommand extends AbstractCommand {
                 if(isNaN(res)) {
                     message.channel.send("Only one operator is supported");
                 } else {
+                    if(Number(a) == 0 && Number(b) == 0) {
+                        message.channel.send("La tête à Toto LOOOL"); 
+                        return
+                    } 
                     message.channel.send(res);
                 }
             })
