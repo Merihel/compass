@@ -30,7 +30,7 @@ As frontend framework
 
 	**BOT_TOKEN** your discord bot token (see https://discord.com/developers/applications)  
 
-	**HTTP** *(for website)* a value between `http://` and `https://`  
+	**SECURE** *(for website)* false will be on `http://` and true will be on `https://`  
 
 	**HOST** *(for website)* the host (ip or domain name)  
 

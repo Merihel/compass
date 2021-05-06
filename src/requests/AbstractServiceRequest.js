@@ -1,16 +1,17 @@
 class AbstractServiceRequest {
     constructor(model,method,params = {}) {
         this.secure = false
-        this.brokerHost = "127.0.0.1"
-        this.brokerPort = "3000"
+        this.brokerHost = process.env.REACT_APP_BROKER_HOST || "127.0.0.1"
+        this.brokerPort = process.env.REACT_APP_BROKER_PORT || "3001"
         this.model = model
         this.method = method
         this.params = params
     }
 
+    
     async execute() {
         try {
-            let route = (this.secure ? "https://":"http://")+this.brokerHost+":"+this.brokerPort+"/"+this.model
+            let route = (this.secure ? "https://":"http://")+this.brokerHost+":"+this.brokerPort+"/api/"+this.model
             let flagFirst = false
             for (const [key, value] of Object.entries(this.params)) {
                 route+=(!flagFirst ? "?":"&")+key+"="+value
@@ -20,12 +21,21 @@ class AbstractServiceRequest {
                 method: this.method
             }
             const result = await fetch(route,init)
-            const json = await result.json()
-            console.log(json)
-            return json
+            if(!result.ok) {
+                return await this.onError(result)
+            } else {
+                return await this.onFinish(result)
+            }
         } catch(e) {
             return e
         }
+    }
+
+    async onFinish(result) {
+        return {error: true, message: "Developer did not implemented onFinish for this request !", code: 500, data: null}
+    }
+    async onError(result) {
+        return {error: true, message: "Developer did not implemented onError for this request !", code: 500, data: null}
     }
 }
 

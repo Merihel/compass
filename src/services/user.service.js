@@ -67,11 +67,11 @@ const service = {
 		 */
 		authenticate: {
 			rest: "POST /authenticate",
+            authorization: false,
 			params: {
                 email: { type: "email" },
                 password: { type: "string", min: 1 }
 			},
-			authorization: false,
 			async handler(ctx) {
                 const { email, password } = ctx.params;
                 LOGGER.log(email + " is authenticating...")
@@ -80,7 +80,7 @@ const service = {
                 if (!user) throw new MoleculerClientError("Email introuvable", 422, "", [{ field: "email", message: "is not found" }]);
                 const res = await Utils.compare(password, user.password)
                 if (!res) throw new MoleculerClientError("Mot de passe incorrect", 403, "", [{ field: "password", message: "wrong" }]);
-                let expiresIn = "1h"
+                let expiresIn = "72h"
                 let response = {
                     token: jwt.sign({id: user.id}, this.settings.JWT_SECRET, {expiresIn: expiresIn}),
                     expiresIn: expiresIn

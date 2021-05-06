@@ -11,20 +11,17 @@ const service = {
         cors: {
             origin: "*",
             methods: ["GET", "OPTIONS", "POST", "PUT", "DELETE"],
-            allowedHeaders: ["content-type"],
-            exposedHeaders: [],
-            credentials: false,
-            maxAge: 3600
+            allowedHeaders: "*",
         },
 		// Exposed port
-		port: process.env.PORT || 3000,
+		port: process.env.BROKER_PORT || 3001,
 		// Exposed IP
 		ip: "0.0.0.0",
 		// Global Express middlewares. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Middlewares
 		use: [],
         routes: [			{
 			path: "/api",
-
+			// Route CORS settings (overwrite global settings)
 			whitelist: [
 				"**"
 			],

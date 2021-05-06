@@ -69,7 +69,7 @@ class RegisterCommand extends AbstractCommand {
                                 }, async (res) => {
                                     LOGGER.log("User registered !")
                                     await callService("user.authenticate", {email: email, password: clearPassword}, async (auth) => {
-                                        const link = process.env.HTTP+process.env.HOST+":"+process.env.WEB_PORT+"/account?"+"token="+auth.token
+                                        const link = process.env.SECURE ? "https://":"http://"+process.env.HOST+":"+process.env.PORT+"/account?"+"token="+auth.token
                                         const mailSent = await Mail.send({
                                             from: '"'+this.config.guildName+'" <'+process.env.MAIL_ID+'>', // sender address
                                             to: email, // list of receivers
