@@ -14,8 +14,9 @@ import Session from "./utils/Session"
 //screens
 import Login from "./screens/Login"
 import Account from "./screens/Account"
+import Dashboard from "./screens/Dashboard"
 //Requests
-import AuthServiceRequest from "./requests/AuthServiceRequest"
+import UserServiceRequest from "./requests/UserServiceRequest"
 
 class App extends React.Component {
   constructor(props) {
@@ -24,12 +25,29 @@ class App extends React.Component {
     this.state = {
       auth: null
     }
+    this.history = null
   }
 
-  onLogin(auth) {
+  async onLogin(auth) {
     if (auth) {
+      let flagError = false
       if(auth.error) {
-        console.log("error", auth.message)
+        flagError = true
+      } else {
+        if(auth.data && auth.data.token) {
+          toast.success("Bienvenue !", {
+            position: "top-right",
+            autoClose: 3000,
+            closeOnClick: true,
+            pauseOnHover: true,
+          });
+          Session.setToken(auth.data.token)
+          await this.getUser(auth.data.token)
+        } else {
+          flagError = true
+        }
+      }
+      if(flagError) {
         toast.error(auth.message, {
           position: "top-right",
           autoClose: 3000,
@@ -39,15 +57,35 @@ class App extends React.Component {
           draggable: true,
           progress: undefined,
         });
-      } else {
-        toast.success("Bienvenue !", {
-          position: "top-right",
-          autoClose: 3000,
-          closeOnClick: true,
-          pauseOnHover: true,
-        });
-        Session.setToken(auth.data.token)
       }
+    }
+  }
+
+  async getUser(authKey) {
+    const req = new UserServiceRequest("user/getByToken", "GET", {token: authKey}, authKey)
+    const res = await req.execute()
+    if(res.error) {
+      if(res.message == "Unauthorized") return
+      toast.error(res.message, {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    } else {
+      if(res.data.id) {
+        this.setState({auth: res.data})
+      }
+    }
+  }
+
+  async componentDidMount() {
+    const token = Session.getToken()
+    if(token) {
+      await this.getUser(token)
     }
   }
 
@@ -67,6 +105,7 @@ class App extends React.Component {
           pauseOnHover
         />
         <Switch>
+
           <Route render={({ location }) =>
             this.checkLogin(location, <Games auth={this.state.auth} />)
           } path="/games">
@@ -75,15 +114,18 @@ class App extends React.Component {
             this.checkLogin(location, <Account auth={this.state.auth} />)
           } path="/profile">
           </Route>
-          <Route path="/">
-            <Login auth={this.state.auth} onLogin={auth => this.onLogin(auth)} />
+          <Route render={() =>
+            this.state.auth ? 
+            <Dashboard auth={this.state.auth} />
+            : <Login auth={this.state.auth} onLogin={auth => this.onLogin(auth)} />
+          } path="/">
           </Route>
         </Switch>
       </Router>
     );
   }
 
-  async checkLogin(location, children) {
+  checkLogin(location, children) {
     if(this.state.auth) {
       return children
     } else {
@@ -113,8 +155,8 @@ function Home(props) {
 */
 
 function Games(props) {
-  return <h2>Games ! Hello, {props.auth ? props.auth.name : null}. You can edit your profile here !</h2>;
+  return <h2>Games ! Hello, {props.auth ? props.auth.login : null}. You can edit your profile here !</h2>;
 }
 function Auth(props) {
-  return <h2>Games ! Hello, {props.auth ? props.auth.name : null}. Like games ?</h2>;
+  return <h2>Games ! Hello, {props.auth ? props.auth.login : null}. Like games ?</h2>;
 }

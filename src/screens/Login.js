@@ -63,7 +63,7 @@ class Login extends React.Component {
                         <Form.Field>
                             <Checkbox className="checkbox" label='Rester connecté' />
                         </Form.Field>
-                        <Button inverted color='orange' centered type='submit'>Connexion</Button>
+                        <Button inverted color='orange' centered="true" type='submit'>Connexion</Button>
                     </Form>
                 </Container>
             </div>

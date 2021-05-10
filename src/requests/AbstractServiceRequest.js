@@ -1,11 +1,12 @@
 class AbstractServiceRequest {
-    constructor(model,method,params = {}) {
+    constructor(model,method,params = {}, auth = null) {
         this.secure = false
         this.brokerHost = process.env.REACT_APP_BROKER_HOST || "127.0.0.1"
         this.brokerPort = process.env.REACT_APP_BROKER_PORT || "3001"
         this.model = model
         this.method = method
         this.params = params
+        this.auth = auth
     }
 
     
@@ -17,8 +18,13 @@ class AbstractServiceRequest {
                 route+=(!flagFirst ? "?":"&")+key+"="+value
                 flagFirst = true
             }
+            const headers = new Headers()
+            if(this.auth) {
+                headers.append("Authorization", "Bearer "+this.auth);
+            }
             const init = {
-                method: this.method
+                method: this.method,
+                headers: headers
             }
             const result = await fetch(route,init)
             if(!result.ok) {

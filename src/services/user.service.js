@@ -4,7 +4,7 @@ const SqlAdapter = require("moleculer-db-adapter-sequelize");
 const Sequelize = require("sequelize");
 const jwt = require("jsonwebtoken");
 //errors
-const { MoleculerClientError } = require("moleculer").Errors;
+const { MoleculerClientError, EntityNotFoundError } = require("moleculer").Errors;
 //---
 const LG = require("../utils/Logger")
 const LOGGER = new LG("USER")
@@ -99,6 +99,8 @@ const service = {
 		 * @returns {Object} Resolved user
 		 */
 		resolveToken: {
+            rest: "GET /getByToken",
+            authorization: true,
 			cache: {
 				keys: ["token"],
 				ttl: 60 * 60 // 1 hour
@@ -121,7 +123,7 @@ const service = {
                     const id = decoded.id
                     let users = await ctx.call("user.find", { query: {id}})
                     const user = users ? users[0] : null
-                    if(!user) throw new MoleculerClientError("User introuvable", 500, "", []);
+                    if(!user) throw new MoleculerClientError("Utilisateur introuvable", 500, "", []);
                     return user
                 }
             }
@@ -154,6 +156,38 @@ const service = {
                     }
                 }
             })
+        },
+        /**
+		 * Get user from email
+		 *
+		 * @actions
+		 * @param {String} email - User's email
+		 *
+		 * @returns {Object} Object containing user data
+		 */
+        getByEmail: {
+            rest: "GET /getByEmail",
+            authorization: true,
+			params: {
+                email: { type: "email" },
+			},
+            async handler(ctx) {
+                return await ctx.call("user.find", {
+                    query: {
+                        email: ctx.params.email ? ctx.params.email : "" 
+                    }
+                }).then((res) => {
+                    if(res.length == 1) {
+                        const user = res[0]
+                        delete user.password
+                        return user
+                    } else if(res.length > 1) {
+                        return new MoleculerClientError("Plusieurs utilisateurs trouvés avec ce mail")
+                    } else {
+                        return new EntityNotFoundError()
+                    }
+                })
+            }
         }
     }
 }
