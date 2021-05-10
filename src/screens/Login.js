@@ -8,7 +8,9 @@ class Login extends React.Component {
         super(props)
 
         this.state = {
-            connected: false
+            connected: false,
+            login: "",
+            password: ""
         }
     }
 
@@ -16,36 +18,45 @@ class Login extends React.Component {
 
     }
 
-    async login(email, password) {
-        /*const req = new AuthServiceRequest("user/authenticate", "POST", {
-            "email": "",
-            "password": ""
+    onChangeLogin(value) {
+        this.setState({login: value})
+    }
+
+    onChangePassword(value) {
+        this.setState({password: value})
+    }
+
+    async login() {
+        const req = new AuthServiceRequest("user/authenticate", "POST", {
+            "email": this.state.login,
+            "password": this.state.password
         })
-        */
+        
         const res = await req.execute()
         this.props.onLogin(res)
     }
 
-
-
     render() {
         return (
-            <div id="screen-login">
-                <Container fluid textAlign='center'>
+            <div id="screen-login" style={{backgroundImage: `url("/variables/background.gif")`}}>
+                <div id="login-gradient"></div>
+                <Container id="login-container" fluid textAlign='center'>
                     <img src="/logo.png" />
-                    <Form>
+                    <Form onSubmit={() => this.login()}>
                         <Form.Field>
-                            <Input
+                            <Form.Input
                                 icon='at'
                                 iconPosition='left'
+                                onChange={(e,value) => this.onChangeLogin(value.value)}
                                 placeholder='Adresse Email'
                             />
                         </Form.Field>
                         <Form.Field>
-                            <Input
+                            <Form.Input
                                 icon='lock'
                                 iconPosition='left'
                                 placeholder='Mot de passe'
+                                onChange={(e,value) => this.onChangePassword(value.value)}
                                 type="password"
                             />
                         </Form.Field>

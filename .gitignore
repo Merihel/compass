@@ -2,6 +2,7 @@
 
 #project's
 config.json
+public/variables
 
 # dependencies
 /node_modules
