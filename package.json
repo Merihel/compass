@@ -42,6 +42,7 @@
     "start": "react-scripts start",
     "server": "nodemon src/services/MainBroker.js",
     "build": "react-scripts build",
+    "build-server": "bash ./scripts/build-server.sh",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "storybook": "start-storybook -p 6006 -s public",

@@ -43,6 +43,20 @@ class RoleManager {
         const role = member ? member.roles ? member.roles.highest : null : null
         return role
     }
+    /**
+     * 
+     * Used to get the mute role according to config
+     *
+     * @param {Discord.Guild} member - The Discord Guild's to get the role from
+     *
+     * @return {Discord.Role} The highest role of the user, null if not found
+    */
+    getMutedRole(guild) {
+        const role = guild.roles.cache.find(role => role.id === config.mutedRoleId);
+        return role
+    }
+
+
 }
 
 module.exports = new RoleManager()

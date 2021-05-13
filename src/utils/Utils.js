@@ -36,6 +36,10 @@ const utils = {
                 { name: 'Erreur', value: error }
             )
         return errorEmbed
+    },
+    isDiscordLink(str) {
+        const regex = new RegExp("(discord.gg\/[A-z0-9]*)", 'g')
+        return regex.test(str)
     }
 
 }

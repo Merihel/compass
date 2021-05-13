@@ -1,9 +1,10 @@
 const Discord = require("discord.js")
-const {pre, guildId} = require("../../config.json")
+const {pre, guildId, commandsOnlyInSpecificChannel, commandChannel} = require("../../config.json")
 const LG = require("../utils/Logger")
 const Utils = require("../utils/Utils")
 const DateUtil = require("../utils/Date")
 const RoleManager = require("../utils/RoleManager")
+const Antispam = require("../utils/Antispam")
 const LOGGER = new LG("BOT")
 const client = new Discord.Client()
 //ALL BOT COMMANDS
@@ -14,6 +15,7 @@ const AccountCommand = require("./bot/AccountCommand")
 const RulesController = require("./bot/RulesController")
 
 let context = null
+
 
 const service = {
     name: "bot",
@@ -144,7 +146,30 @@ updateUser = async (message) => {
     }
 }
 
-notCommand = (message) => { //yeah this is an easter egg for my friend Moon...
+punishSpam = (message, member) => {
+    const role = RoleManager.getMutedRole(member.guild)
+    if(role) {
+        message.guild.members.cache.get(message.author.id).roles.add(role);
+        message.channel.send(member.displayName+", tu as été mute à cause du spam. Contacte un membre du Staff 😉")
+        Antispam.deleteSpamRegistering(member.id)
+    } else {
+        LOGGER.error("LE ROLE MUTED N'A PAS ETE TROUVE DANS LA CONFIGURATION")
+    }
+}
+
+notCommand = (message) => { //yeah this is an easter egg for my friend Moon... also an antispam and anti Discord link
+    const member = message.member
+    const memberTopRole = RoleManager.getHighestRoleFromDiscordMember(member)
+
+    if(Utils.isDiscordLink(message.content)) {
+        const checkedRole = RoleManager.checkRole(memberTopRole.id, 3)
+        if(roleChecker(message, checkedRole, false)) {
+            return
+        } else {
+            message.channel.send(`Les liens Discord sont interdits ${member.displayName}`)
+            message.delete({timeout: 100});
+        }
+    }
     if (message.content.includes("feur") || message.content.includes("Feur")) {
         message.channel.messages.fetch({limit: 2})
         .then(messageMappings => {
@@ -158,19 +183,41 @@ notCommand = (message) => { //yeah this is an easter egg for my friend Moon...
     }
 }
 
-roleChecker = (message, checkedRole) => {
+roleChecker = (message, checkedRole, isCommand = true) => {
     if(checkedRole.result) {
         return true
     } else {
-        message.react("⛔")
+        isCommand && message.react("⛔")
         return false
     }
 }
 
 client.on('message', async message => {
+    console.log("message !")
     if (message.author.bot || !message.content.startsWith(pre)) {
+        if(!message.author.bot) {
+            //todo antispam for "everyone" role ! (antilink)
+            const member = message.member
+            const memberTopRole = RoleManager.getHighestRoleFromDiscordMember(member)
+            if(memberTopRole.id === guildId) {
+                if(Antispam.checkForLinks(message)) {
+                    message.delete({timeout:100})
+                }
+            }
+            const checkedRole = RoleManager.checkRole(memberTopRole.id, 3)
+            if(!roleChecker(message, checkedRole, false)) {
+                if(Antispam.checkForSpam(message.content, message.member.id)) {
+                    punishSpam(message, message.member)
+                }
+            }
+        }
         notCommand(message)
         return
+    }
+    if(commandsOnlyInSpecificChannel) {
+        if(message.channel.id !== commandChannel) {
+            return
+        }
     }
 
     updateUser(message)
