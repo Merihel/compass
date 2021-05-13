@@ -44,9 +44,9 @@ jobs:
           # Ftp password
           password: ${{ secrets.FTP_PASS }}
           # The remote folder location of your FTP server
-          remote_folder: /API/
+          remote_folder: API/
           # The local folder location
-          local_folder: /serverBuild/*
+          local_folder: serverBuild/*
       
       # Installing Node dependencies
       - name: Installing Node dependencies
