@@ -47,12 +47,6 @@ jobs:
           remote_folder: API
           # The local folder location
           local_folder: serverBuild
-      
-      # Installing Node dependencies
-      - name: Installing Node dependencies
-        uses: CultureHQ/actions-yarn@master
-        with:
-          args: install
           
       - name: SSH Connection for Installing dependencies and Restarting afterward
         # You may pin to the exact commit or the version.
