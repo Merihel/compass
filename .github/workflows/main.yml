@@ -53,3 +53,21 @@ jobs:
         uses: CultureHQ/actions-yarn@master
         with:
           args: install
+          
+      - name: SSH Connection for Installing dependencies and Restarting afterward
+        # You may pin to the exact commit or the version.
+        # uses: appleboy/ssh-action@1d1b21ca96111b1eb4c03c21c14ebb971d2200f6
+        uses: appleboy/ssh-action@v0.1.4
+        with:
+          # ssh host
+          host: ${{ secrets.SSH_HOST }}
+          # ssh username
+          username: ${{ secrets.SSH_LOGIN }}
+          # ssh password
+          password: ${{ secrets.SSH_PASS }}
+          # execute commands
+          script: |
+            cloudlinux-selector install-modules --json --interpreter nodejs --user ${{ secrets.SSH_LOGIN }} --app-root API
+            cloudlinux-selector restart --json --interpreter nodejs --user kscl5569 --app-root API
+          # stop script after first failure
+          script_stop: true
