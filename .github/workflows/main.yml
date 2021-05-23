@@ -48,8 +48,6 @@ jobs:
           # The local folder location
           local_folder: serverBuild
           
-      - uses: actions/checkout@master
-      
       - name: curl
         uses: wei/curl@v1
         with:
