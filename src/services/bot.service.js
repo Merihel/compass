@@ -193,7 +193,6 @@ roleChecker = (message, checkedRole, isCommand = true) => {
 }
 
 client.on('message', async message => {
-    console.log("message !")
     if (message.author.bot || !message.content.startsWith(pre)) {
         if(!message.author.bot) {
             //todo antispam for "everyone" role ! (antilink)
