@@ -1,10 +1,18 @@
-const Moment = require("moment")
+const moment = require("moment")
+const momentDurationFormatSetup = require("moment-duration-format")
+momentDurationFormatSetup(moment)
 
 const DateUtils = {
     compareWithNow(timestamp) {
-        const now = new Moment(Date.now())
-        const differencial = new Moment(timestamp)
+        const now = new moment(Date.now())
+        const differencial = new moment(timestamp)
         return now.diff(differencial, "minutes")
+    },
+    getUptimeFromSeconds(seconds) {
+        const formatted = moment.duration.format([
+            moment.duration(seconds, "millisecond")
+        ], "d [days] hh:mm:ss");
+        return formatted
     }
 }
 
