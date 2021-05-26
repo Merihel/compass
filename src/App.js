@@ -28,7 +28,7 @@ class App extends React.Component {
     this.history = null
   }
 
-  async onLogin(auth) {
+  async onLogin(auth, keepSession) {
     if (auth) {
       let flagError = false
       if(auth.error) {
@@ -41,7 +41,7 @@ class App extends React.Component {
             closeOnClick: true,
             pauseOnHover: true,
           });
-          Session.setToken(auth.data.token)
+          if(keepSession) Session.setToken(auth.data.token)
           await this.getUser(auth.data.token)
         } else {
           flagError = true

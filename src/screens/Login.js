@@ -10,7 +10,8 @@ class Login extends React.Component {
         this.state = {
             connected: false,
             login: "",
-            password: ""
+            password: "",
+            keepSession: false
         }
     }
 
@@ -33,7 +34,7 @@ class Login extends React.Component {
         })
         
         const res = await req.execute()
-        this.props.onLogin(res)
+        this.props.onLogin(res, this.state.keepSession)
     }
 
     render() {
@@ -61,7 +62,7 @@ class Login extends React.Component {
                             />
                         </Form.Field>
                         <Form.Field>
-                            <Checkbox className="checkbox" label='Rester connecté' />
+                            <Checkbox className="checkbox" onChange={(it, value) => this.setState({ keepSession: value.checked })} label='Rester connecté' />
                         </Form.Field>
                         <Button inverted color='orange' centered="true" type='submit'>Connexion</Button>
                     </Form>

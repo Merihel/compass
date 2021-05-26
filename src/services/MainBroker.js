@@ -30,7 +30,7 @@ MainBroker.createService(ApiService)
 MainBroker.start()
     .then(res => {
         //console.log("env", process.env.NODE_ENV)
-        MainBroker.call("bot.start") //Waking up Discord bot
+        process.env.NODE_ENV == "development" ? null : MainBroker.call("bot.start") //Waking up Discord bot
     })
     .catch(err => {
         LOGGER.error(`Error occured!`);

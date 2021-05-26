@@ -258,7 +258,7 @@ client.on('message', async message => {
                 message.react("❌")
             });
     } else {
-        message.react("❓")
+        //Nothing happens here, not a valid command
     } /*else if(message.content.startsWith(`${pre}connect`)) {
         let member = message.member
         let pass = message.content.split("!connect ")[1]
