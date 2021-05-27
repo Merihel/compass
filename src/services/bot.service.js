@@ -42,8 +42,8 @@ const service = {
             rest: "GET /ping",
             authorization: false,
             async handler(ctx) { 
-                ctx.broker.ping("compass-1", 1000).then(res => LOGGER.info("PING BOT - Uptime: '"+DateUtil.getUptimeFromSeconds(client.uptime)+"'"));
-                return {"message": "Uptime: "+DateUtil.getUptimeFromSeconds(client.uptime), code: 200}
+                ctx.broker.ping("compass-1", 1000).then(res => null);
+                return {"message": "Uptime: "+DateUtil.getUptimeFromMilliseconds(client.uptime), code: 200}
             }
         }
     }

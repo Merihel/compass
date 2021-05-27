@@ -8,7 +8,7 @@ const DateUtils = {
         const differencial = new moment(timestamp)
         return now.diff(differencial, "minutes")
     },
-    getUptimeFromSeconds(seconds) {
+    getUptimeFromMilliseconds(seconds) {
         const formatted = moment.duration.format([
             moment.duration(seconds, "millisecond")
         ], "d [days] hh:mm:ss");
