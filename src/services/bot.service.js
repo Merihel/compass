@@ -135,16 +135,18 @@ updateUser = async (message) => {
     const user = await message.author
     await callService("user.find", {query: {discord_id: member.id}}, async (res) => {
         if(res) {
-            if(DateUtil.compareWithNow(res[0].updatedAt) > 30) {
+            if(DateUtil.compareWithNow(res[0].updatedAt) > 3) {
                 doUpdate = true
                 dbUser = res[0]
             } else {
-                LOGGER.log("Not updating user since last update is from less than 1 minute")
+                LOGGER.log("Not updating user since last update is from less than 3 minute")
             }
         }
     }).catch((e) => {LOGGER.error(e)})
     if(dbUser && doUpdate) {
-        await callService("user.update", {id: dbUser.id, login: member.displayName, tag:user.tag, updatedAt: Date.now()}, async (res) => {
+        const memberTopRole = RoleManager.getHighestRoleFromDiscordMember(member)
+        const dbRole = await RoleManager.getTopDBRoleByDiscordId(context,memberTopRole.id)
+        await callService("user.update", {id: dbUser.id, login: member.displayName, tag:user.tag, topRole: dbRole.id, updatedAt: Date.now()}, async (res) => {
             if(res) {
                 LOGGER.log("Updated user "+member.id)
             }

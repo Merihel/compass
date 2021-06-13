@@ -1,5 +1,5 @@
 import React from "react"
-import { Icon } from 'semantic-ui-react'
+import { Button } from "semantic-ui-react"
 import AbstractComponent from "./AbstractComponent"
 
 class Navbar extends AbstractComponent {
@@ -7,16 +7,15 @@ class Navbar extends AbstractComponent {
         super(props)
 
         this.state = {
-            burgerToggle: false
+            
         }
     }
 
     render() {
-        let icon = this.state.burgerToggle ? "close" : "bars"
         return(
-            <div className="navbar">
-                <Icon onClick={() => this.setState({burgerToggle: !this.state.burgerToggle})} style={{cursor: "pointer"}} color={this.theme.textPrimary} name={icon} size="big" />
-                <span>Voix ambiguë d'un cœur qui, au zéphyr, préfère les jattes de kiwis.</span>
+            <div className="w-full h-16 fixed bg-dark">
+                <Button onClick={() => {this.props.onBurgerClick()}}/>
+                <span className='text-red-500'>helldo</span>
             </div>
         )
     }

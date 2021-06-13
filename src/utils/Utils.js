@@ -40,6 +40,13 @@ const utils = {
     isDiscordLink(str) {
         const regex = new RegExp("(discord.gg\/[A-z0-9]*)", 'g')
         return regex.test(str)
+    },
+    sanitizeSensitive(object) {
+        const list = ["password"]
+        list.forEach(field => {
+            delete object[field]
+        });
+        return object
     }
 
 }

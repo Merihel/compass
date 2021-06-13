@@ -7,7 +7,8 @@ const AuthService = require("./auth.service")
 const MathService = require("./math.service")
 const BotService = require("./bot.service")
 const UserService = require("./user.service")
-const ApiService = require("./api.service");
+const RoleService = require("./role.service")
+const ApiService = require("./api.service")
 
 // Create a ServiceBroker
 const MainBroker = new ServiceBroker({
@@ -23,6 +24,7 @@ MainBroker.createService(BrokerService)
 MainBroker.createService(AuthService)
 MainBroker.createService(MathService)
 MainBroker.createService(BotService)
+MainBroker.createService(RoleService)
 MainBroker.createService(UserService)
 MainBroker.createService(ApiService)
 
@@ -30,7 +32,7 @@ MainBroker.createService(ApiService)
 MainBroker.start()
     .then(res => {
         //console.log("env", process.env.NODE_ENV)
-        process.env.NODE_ENV == "development" ? null : MainBroker.call("bot.start") //Waking up Discord bot
+        process.env.NODE_ENV == "development" ? MainBroker.call("bot.start") : MainBroker.call("bot.start") //Waking up Discord bot
     })
     .catch(err => {
         LOGGER.error(`Error occured!`);

@@ -3,6 +3,7 @@ const LG = require("../../utils/Logger")
 const LOGGER = new LG("BOT")
 const Utils = require("../../utils/Utils")
 const Mail = require("../../utils/Mail")
+const RoleManager = require("../../utils/RoleManager")
 
 class RegisterCommand extends AbstractCommand {
 
@@ -10,6 +11,29 @@ class RegisterCommand extends AbstractCommand {
         const member = await message.member
         const user = await message.author
         const dmChannel = await member.createDM()
+        const memberTopRole = RoleManager.getHighestRoleFromDiscordMember(member)
+        let dbRole = null
+        if(memberTopRole.id) {
+            await callService("role.existsByDiscordId", {
+                discord_id: memberTopRole.id
+            }, async (res) => {
+                try {
+                    if(!res.data.exists) {
+                        dbRole = await callService("role.create", {
+                            name:memberTopRole.name,
+                            color:memberTopRole.color,
+                            discord_id:memberTopRole.id
+                        })
+                    } else {
+                        dbRole = await callService("role.find", {query: {discord_id: memberTopRole.id}})
+                    }
+                } catch(e) {
+                    LOGGER.error(e)
+                }
+            })
+        } else {
+            LOGGER.warning("Can't get top role for registering user ! His current top role will not be affected to his DB entry in 'Users'")
+        }
         callService("user.existsByDiscordId", {
             discord_id: member.id
         }, async (res) => {
@@ -65,7 +89,8 @@ class RegisterCommand extends AbstractCommand {
                                     email: email,
                                     discord_id: member.id,
                                     bio: null,
-                                    clearPassword: clearPassword
+                                    clearPassword: clearPassword,
+                                    topRole: dbRole ? dbRole.id : null
                                 }, async (res) => {
                                     LOGGER.log("User registered !")
                                     await callService("user.authenticate", {email: email, password: clearPassword}, async (auth) => {

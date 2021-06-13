@@ -18,7 +18,7 @@ class Logger {
     }
     static getLogFormattedDate() {
         const d = new Date()
-        return d.getDate() + "-" + d.getMonth() + "-" + d.getFullYear() + " | " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds()
+        return d.getDate() + "-" + parseInt(d.getMonth()+1) + "-" + d.getFullYear() + " | " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds()
     }
 }
 

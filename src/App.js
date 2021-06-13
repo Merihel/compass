@@ -17,13 +17,15 @@ import Account from "./screens/Account"
 import Dashboard from "./screens/Dashboard"
 //Requests
 import UserServiceRequest from "./requests/UserServiceRequest"
+import { Loader } from "semantic-ui-react";
 
 class App extends React.Component {
   constructor(props) {
     super(props)
     toast.configure();
     this.state = {
-      auth: null
+      auth: null,
+      loggedIn: false
     }
     this.history = null
   }
@@ -41,6 +43,7 @@ class App extends React.Component {
             closeOnClick: true,
             pauseOnHover: true,
           });
+          console.log("keepSession?", keepSession)
           if(keepSession) Session.setToken(auth.data.token)
           await this.getUser(auth.data.token)
         } else {
@@ -77,13 +80,14 @@ class App extends React.Component {
       });
     } else {
       if(res.data.id) {
-        this.setState({auth: res.data})
+        this.setState({auth: res.data, loggedIn: true})
       }
     }
   }
 
   async componentDidMount() {
     const token = Session.getToken()
+    this.setState({loggedIn: true})
     if(token) {
       await this.getUser(token)
     }
@@ -115,9 +119,11 @@ class App extends React.Component {
           } path="/profile">
           </Route>
           <Route render={() =>
-            this.state.auth ? 
-            <Dashboard auth={this.state.auth} />
-            : <Login auth={this.state.auth} onLogin={auth => this.onLogin(auth)} />
+            this.state.loggedIn ?
+              !this.state.auth ? 
+                <Loader /> :  
+                <Dashboard auth={this.state.auth} />
+            : <Login auth={this.state.auth} onLogin={(auth,keepSession) => this.onLogin(auth,keepSession)} />
           } path="/">
           </Route>
         </Switch>

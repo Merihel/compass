@@ -18,7 +18,7 @@ const service = {
     mixins: [DbService],
     adapter: DB.getSQLAdapter(),
     settings: {
-        JWT_SECRET: process.env.JWT_SECRET || "DEFAULT_JWT_SECRET",
+        JWT_SECRET: "DEFAULT_JWT_SECRET",
     },
     model: {
         name: "user",
@@ -38,7 +38,8 @@ const service = {
             bio: {
                 type: Sequelize.STRING,
             },
-            password: Sequelize.STRING
+            password: Sequelize.STRING,
+            topRole: Sequelize.INTEGER
         }
     },
     hooks: {
@@ -53,7 +54,7 @@ const service = {
 					ctx.params.password = Utils.salt(ctx.params.clearPassword)
                 }
             }
-        }
+        },
     },
     actions: {
         /**
@@ -121,10 +122,9 @@ const service = {
 				});
 				if (decoded.id) {
                     const id = decoded.id
-                    let users = await ctx.call("user.find", { query: {id}})
-                    const user = users ? users[0] : null
+                    const user = await ctx.call("user.get", { id: id, doPopulate: true })
                     if(!user) throw new MoleculerClientError("Utilisateur introuvable", 500, "", []);
-                    return user
+                    return Utils.sanitizeSensitive(user)
                 }
             }
 		},
@@ -187,6 +187,18 @@ const service = {
                         return new EntityNotFoundError()
                     }
                 })
+            }
+        },
+        async get(ctx) {
+            if(ctx.params.doPopulate) {
+                const user = await ctx.call("user.find", { query: {id:ctx.params.id}})
+                console.log("USER ?", user)
+                const userRoleId = user[0].topRole
+                user[0].topRole = await ctx.call("role.get", { id: userRoleId })
+                return user[0]
+            } else {
+                const user = await ctx.call("user.find", { query: {id:ctx.params.id}})
+                return user
             }
         }
     }

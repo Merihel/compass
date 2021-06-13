@@ -55,7 +55,24 @@ class RoleManager {
         const role = guild.roles.cache.find(role => role.id === config.mutedRoleId);
         return role
     }
-
+    /**
+     * 
+     * Used to get the DBRole 
+     *
+     * @param {Context} context - The broker context
+     * @param {String} discordId - The Discord Role Id to get the DBRole from
+     *
+     * @return {Object} The highest DBRole of the user, null if not found
+    */
+    async getTopDBRoleByDiscordId(context,discordId) {
+        let role = null
+        await context.call("role.find", {query: {discord_id: discordId}}).then(res => {
+            if(res && res[0] && res[0].id) {
+                role = res[0]
+            }
+        })
+        return role
+    }
 
 }
 
