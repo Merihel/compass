@@ -90,6 +90,8 @@ class App extends React.Component {
     this.setState({loggedIn: true})
     if(token) {
       await this.getUser(token)
+    } else {
+      this.setState({loggedIn: false})
     }
   }
 
