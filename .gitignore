@@ -2,6 +2,7 @@
 
 #project's
 config.json
+nodemon.json
 public/variables
 
 # dependencies

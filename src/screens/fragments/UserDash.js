@@ -30,7 +30,7 @@ class UserDash extends AbstractComponent {
         return (
             <div className="w-full h-full pt-16 bg-gray-800 flex flex-col">
                 <div className="w-100 h-8 p-4 mb-2">
-                    <Checkbox className="checkbox" onChange={(it, value) => this.setState({ moveMode: value.checked })} value={this.state.moveMode} label='Move cards' />
+                    <Checkbox className="checkbox" onChange={(it, value) => this.setState({ moveMode: value.checked })} label='Move cards' />
                 </div>
                 <ResponsiveGridLayout
                     className="layout"
@@ -41,7 +41,7 @@ class UserDash extends AbstractComponent {
                     draggableHandle=".card-dragger"
                     isResizable={false}
                 >
-                    <div key="a" data-grid={{ x: 0, y: 0, w: 1, h: 8 }}>
+                    <div key="a" data-grid={{ x: 0, y: 0, w: 1, h: 10 }}>
                         {this.state.moveMode ? <DragMove /> : null}
                         <CardComponent 
                             header={"Ma première carte !"}

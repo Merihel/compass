@@ -13,6 +13,11 @@ class Session {
         this.token = token
         return this.token
     }
+
+    removeToken() {
+        sessionStorage.removeItem("token")
+        return null
+    }
 }
 
 module.exports = new Session()

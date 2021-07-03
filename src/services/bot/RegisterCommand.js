@@ -90,7 +90,9 @@ class RegisterCommand extends AbstractCommand {
                                     discord_id: member.id,
                                     bio: null,
                                     clearPassword: clearPassword,
-                                    topRole: dbRole ? dbRole.id : null
+                                    top_role: dbRole ? dbRole.id : null,
+                                    reset_pass: Utils.createResetToken()
+                                    
                                 }, async (res) => {
                                     LOGGER.log("User registered !")
                                     await callService("user.authenticate", {email: email, password: clearPassword}, async (auth) => {

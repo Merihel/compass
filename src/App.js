@@ -1,6 +1,7 @@
 import React from "react";
 import 'react-toastify/dist/ReactToastify.min.css';
 import './css/App.css';
+import { Loader } from "semantic-ui-react";
 import {
   BrowserRouter as Router,
   Switch,
@@ -13,11 +14,11 @@ import { ToastContainer, toast } from 'react-toastify';
 import Session from "./utils/Session"
 //screens
 import Login from "./screens/Login"
+import ResetPass from "./screens/ResetPass"
 import Account from "./screens/Account"
 import Dashboard from "./screens/Dashboard"
 //Requests
 import UserServiceRequest from "./requests/UserServiceRequest"
-import { Loader } from "semantic-ui-react";
 
 class App extends React.Component {
   constructor(props) {
@@ -68,7 +69,6 @@ class App extends React.Component {
     const req = new UserServiceRequest("user/getByToken", "GET", {token: authKey}, authKey)
     const res = await req.execute()
     if(res.error) {
-      if(res.message == "Unauthorized") return
       toast.error(res.message, {
         position: "top-right",
         autoClose: 3000,
@@ -78,6 +78,7 @@ class App extends React.Component {
         draggable: true,
         progress: undefined,
       });
+      if(res.message == "Unauthorized") return
     } else {
       if(res.data.id) {
         this.setState({auth: res.data, loggedIn: true})
@@ -106,8 +107,8 @@ class App extends React.Component {
           newestOnTop={false}
           closeOnClick
           rtl={false}
-          pauseOnFocusLoss
           draggable
+          pauseOnFocusLoss
           pauseOnHover
         />
         <Switch>
@@ -126,12 +127,15 @@ class App extends React.Component {
                 <Loader /> :  
                 <Dashboard auth={this.state.auth} />
             : <Login auth={this.state.auth} onLogin={(auth,keepSession) => this.onLogin(auth,keepSession)} />
-          } path="/">
+          } exact path="/" >
           </Route>
+          <Route render={(props) => <ResetPass {...props} />} path="/reset-password/:token"></Route>
+          <Redirect from="/reset-password/" to="/" />
         </Switch>
       </Router>
     );
   }
+
 
   checkLogin(location, children) {
     if(this.state.auth) {

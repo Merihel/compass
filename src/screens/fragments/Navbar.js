@@ -38,8 +38,7 @@ class Navbar extends AbstractComponent {
         const displayImage = this.props.sidebarState ? "" : "hidden"
         return(
             <div className={"-top-px w-full h-16 fixed bg-dark flex flex-row z-10 " + shadow}>
-                <div className={leftSide + "transition-all duration-300 justify-center flex"}>
-                    {<img className={"noselect "+displayImage} src="/logo.png" />}
+                <div className={leftSide + "transition-all duration-300 justify-end flex"}>
                     <AnimatedBurger stateOnInit={this.props.sidebarState} onBurgerClick={() => {this.props.onBurgerClick()}} />
                 </div>
             </div>

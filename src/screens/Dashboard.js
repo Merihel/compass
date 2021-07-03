@@ -14,7 +14,6 @@ class Dashboard extends React.Component {
 
         const _refSidebar = null
     }
-
     
     onNavbarBurgerClick() {
         this._refSidebar._toggleSidebar()
@@ -29,7 +28,7 @@ class Dashboard extends React.Component {
         const dashWidth = this.state.sidebarState ? "w-4/5 " : "w-full"
         return (
             <div className="bg-gray-800 container-main w-screen min-h-screen flex flex-col">
-                <Navbar sidebarState={this.state.sidebarState} onBurgerClick={() => { this.onNavbarBurgerClick() }} />
+                <Navbar username={this.props.auth.login} sidebarState={this.state.sidebarState} onBurgerClick={() => { this.onNavbarBurgerClick() }} />
                 <div className="container-middle w-full h-full flex flex-row">
                     <Sidebar ref={it => { this._refSidebar = it }} />
                     <div className={"container-content transition-all " + dashWidth}>

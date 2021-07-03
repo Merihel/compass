@@ -9,6 +9,7 @@
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
     "bcrypt": "^5.0.1",
+    "crypto-js": "^4.0.0",
     "discord.js": "^12.5.1",
     "dotenv": "^8.2.0",
     "global": "^4.4.0",

@@ -4,7 +4,7 @@ const SqlAdapter = require("moleculer-db-adapter-sequelize");
 const Sequelize = require("sequelize");
 const jwt = require("jsonwebtoken");
 //errors
-const { MoleculerClientError, EntityNotFoundError } = require("moleculer").Errors;
+const { MoleculerError } = require("moleculer").Errors;
 //---
 const LG = require("../utils/Logger")
 const LOGGER = new LG("USER")
@@ -39,7 +39,8 @@ const service = {
                 type: Sequelize.STRING,
             },
             password: Sequelize.STRING,
-            topRole: Sequelize.INTEGER
+            top_role: Sequelize.INTEGER,
+            reset_pass: Sequelize.STRING
         }
     },
     hooks: {
@@ -50,6 +51,11 @@ const service = {
              * @param {Context} ctx
              */
             async create(ctx) {
+				if(!ctx.params.password) {
+					ctx.params.password = Utils.salt(ctx.params.clearPassword)
+                }
+            },
+            async update(ctx) {
 				if(!ctx.params.password) {
 					ctx.params.password = Utils.salt(ctx.params.clearPassword)
                 }
@@ -78,9 +84,9 @@ const service = {
                 LOGGER.log(email + " is authenticating...")
                 let users = await ctx.call("user.find", { query: {email: email}})
                 const user = users ? users[0] : null
-                if (!user) throw new MoleculerClientError("Email introuvable", 422, "", [{ field: "email", message: "is not found" }]);
+                if (!user) throw new MoleculerError("Email introuvable", 422, "", [{ field: "email", message: "is not found" }]);
                 const res = await Utils.compare(password, user.password)
-                if (!res) throw new MoleculerClientError("Mot de passe incorrect", 403, "", [{ field: "password", message: "wrong" }]);
+                if (!res) throw new MoleculerError("Mot de passe incorrect", 403, "", [{ field: "password", message: "wrong" }]);
                 let expiresIn = "72h"
                 let response = {
                     token: jwt.sign({id: user.id}, this.settings.JWT_SECRET, {expiresIn: expiresIn}),
@@ -123,7 +129,7 @@ const service = {
 				if (decoded.id) {
                     const id = decoded.id
                     const user = await ctx.call("user.get", { id: id, doPopulate: true })
-                    if(!user) throw new MoleculerClientError("Utilisateur introuvable", 500, "", []);
+                    if(!user) throw new MoleculerError("Utilisateur introuvable", 500, "", []);
                     return Utils.sanitizeSensitive(user)
                 }
             }
@@ -182,9 +188,42 @@ const service = {
                         delete user.password
                         return user
                     } else if(res.length > 1) {
-                        return new MoleculerClientError("Plusieurs utilisateurs trouvés avec ce mail")
+                        throw new MoleculerError("Plusieurs utilisateurs trouvés avec ce mail", 500, "", [])
                     } else {
-                        return new EntityNotFoundError()
+                        LOGGER.error("Une erreur est survenue lors de la requête: "+res, 500, "", [])
+                        throw new MoleculerError()
+                    }
+                })
+            }
+        },
+        /**
+		 * Get user from reset_password token
+		 *
+		 * @actions
+		 * @param {String} token - User reset_password token
+		 *
+		 * @returns {Object} Object containing user data
+		 */
+         getByResetPassword: {
+            rest: "GET /getByResetPasswordToken",
+            authorization: false,
+			params: {
+                token: { type: "string" },
+			},
+            async handler(ctx) {
+                return await ctx.call("user.find", {
+                    query: {
+                        reset_pass: ctx.params.token ? ctx.params.token : "" 
+                    }
+                }).then((res) => {
+                    if(res.length == 1) {
+                        const user = res[0]
+                        delete user.password
+                        return user
+                    } else if(res.length > 1) {
+                        throw new MoleculerError("Plusieurs utilisateurs trouvés avec ce token reset_pass", 500, "", [])
+                    } else {
+                        throw new MoleculerError("Mauvais traitement de la réponse. Res: "+res, 500, "", [])
                     }
                 })
             }
@@ -192,13 +231,41 @@ const service = {
         async get(ctx) {
             if(ctx.params.doPopulate) {
                 const user = await ctx.call("user.find", { query: {id:ctx.params.id}})
-                console.log("USER ?", user)
-                const userRoleId = user[0].topRole
-                user[0].topRole = await ctx.call("role.get", { id: userRoleId })
+                const userRoleId = user[0].top_role
+                user[0].top_role = await ctx.call("role.get", { id: userRoleId })
                 return user[0]
             } else {
                 const user = await ctx.call("user.find", { query: {id:ctx.params.id}})
                 return user
+            }
+        },
+        /**
+		 * Update user's password
+		 *
+		 * @actions
+		 * @param {String} reset_token - User reset_password token
+		 * @param {String} salt - User salted password
+		 *
+		 * @returns {Object} Object containing user data
+		 */
+        updatePassword: {
+            rest: "post /updatePassword",
+            authorization: false,
+			params: {
+                reset_token: { type: "string" },
+                password: { type: "string" },
+			},
+            async handler(ctx) {
+                const user = await ctx.call("user.getByResetPassword", {token: ctx.params.reset_token})
+                if(user) {
+                    user.password = Utils.salt(ctx.params.password)
+                    user.reset_pass = null
+                    const newUser = await this.adapter.updateById(user.id, {"$set": user})
+                    newUser.password = undefined
+                    return newUser
+                } else {
+                    throw new MoleculerError("Utilisateur introuvable lors de la mise à jour du mot de passe. Res: "+res, 500, "", [])
+                }
             }
         }
     }

@@ -1,4 +1,6 @@
 const bcrypt = require("bcrypt")
+const CryptoJS = require("crypto-js")
+const crypto = require("crypto")
 const Discord = require("discord.js")
 
 const utils = {
@@ -47,6 +49,9 @@ const utils = {
             delete object[field]
         });
         return object
+    },
+    createResetToken() {
+        return CryptoJS.AES.encrypt(crypto.randomBytes(24), crypto.randomBytes(24)).toString()
     }
 
 }
