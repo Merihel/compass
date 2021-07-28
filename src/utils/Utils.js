@@ -1,6 +1,10 @@
 const bcrypt = require("bcrypt")
 const CryptoJS = require("crypto-js")
-const crypto = require("crypto")
+try {
+    const crypto = require("crypto")
+} catch (e) {
+    console.log("Utils imported in ReactJS, can't load crypto")
+}
 const Discord = require("discord.js")
 
 const utils = {

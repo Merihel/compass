@@ -88,6 +88,7 @@ class RegisterCommand extends AbstractCommand {
                                     tag: user.tag,
                                     email: email,
                                     discord_id: member.id,
+                                    avatar: user.displayAvatarURL({dynamic: true}),
                                     bio: null,
                                     clearPassword: clearPassword,
                                     top_role: dbRole ? dbRole.id : null,

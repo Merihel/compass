@@ -2,6 +2,8 @@ import React from "react"
 import { Button, Checkbox, Form, Container, Input } from 'semantic-ui-react'
 //Requests
 import AuthServiceRequest from "../requests/AuthServiceRequest"
+//utils
+import String from "../utils/String"
 
 class Login extends React.Component {
     constructor(props) {
@@ -11,6 +13,8 @@ class Login extends React.Component {
             connected: false,
             login: "",
             password: "",
+            errorLogin: null,
+            errorPassword: null,
             keepSession: false
         }
     }
@@ -28,11 +32,16 @@ class Login extends React.Component {
     }
 
     async login() {
+        if(!String.validateEmail(this.state.login)) {
+            this.setState({errorLogin: {content: 'Veuillez entrer une adresse email valide', pointing: 'above'}})
+            return
+        } else {
+            this.setState({errorLogin:null})
+        }
         const req = new AuthServiceRequest("user/authenticate", "POST", {
             "email": this.state.login,
             "password": this.state.password
         })
-        
         const res = await req.execute()
         this.props.onLogin(res, this.state.keepSession)
     }
@@ -50,6 +59,8 @@ class Login extends React.Component {
                                 iconPosition='left'
                                 onChange={(e,value) => this.onChangeLogin(value.value)}
                                 placeholder='Adresse Email'
+                                autoComplete="email"
+                                error={this.state.errorLogin}
                             />
                         </Form.Field>
                         <Form.Field>
@@ -59,12 +70,22 @@ class Login extends React.Component {
                                 placeholder='Mot de passe'
                                 onChange={(e,value) => this.onChangePassword(value.value)}
                                 type="password"
+                                autoComplete="current-password"
+                                error={this.state.errorPassword}
                             />
                         </Form.Field>
                         <Form.Field>
                             <Checkbox className="checkbox" onChange={(it, value) => this.setState({ keepSession: value.checked })} label='Rester connecté' />
                         </Form.Field>
-                        <Button inverted color='orange' centered="true" type='submit'>Connexion</Button>
+                        <Button 
+                            inverted 
+                            disabled={
+                                !this.state.login || !this.state.password
+                            } 
+                            color='orange' 
+                            centered="true" 
+                            type='submit'
+                        >Connexion</Button>
                     </Form>
                 </Container>
             </div>

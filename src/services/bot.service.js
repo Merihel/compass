@@ -146,9 +146,11 @@ updateUser = async (message) => {
     if(dbUser && doUpdate) {
         const memberTopRole = RoleManager.getHighestRoleFromDiscordMember(member)
         const dbRole = await RoleManager.getTopDBRoleByDiscordId(context,memberTopRole.id)
-        await callService("user.update", {id: dbUser.id, login: member.displayName, tag:user.tag, top_role: dbRole.id, updatedAt: Date.now()}, async (res) => {
+        await callService("user.update", {id: dbUser.id, login: member.displayName, tag:user.tag, avatar: user.displayAvatarURL({dynamic: true}), top_role: dbRole.id, updatedAt: Date.now()}, async (res) => {
             if(res) {
                 LOGGER.log("Updated user "+member.id)
+            } else {
+                LOGGER.log("Couldn't update user ! Member Id: "+member.id)
             }
         }).catch(e => {
             LOGGER.error(e)

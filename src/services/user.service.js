@@ -35,6 +35,7 @@ const service = {
                 unique: true
             },
             discord_id: Sequelize.STRING,
+            avatar: Sequelize.STRING,
             bio: {
                 type: Sequelize.STRING,
             },
@@ -51,11 +52,6 @@ const service = {
              * @param {Context} ctx
              */
             async create(ctx) {
-				if(!ctx.params.password) {
-					ctx.params.password = Utils.salt(ctx.params.clearPassword)
-                }
-            },
-            async update(ctx) {
 				if(!ctx.params.password) {
 					ctx.params.password = Utils.salt(ctx.params.clearPassword)
                 }

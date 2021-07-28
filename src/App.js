@@ -9,9 +9,10 @@ import {
   Link,
   Redirect
 } from "react-router-dom";
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 //utils
 import Session from "./utils/Session"
+import Toast from "./utils/Toast"
 //screens
 import Login from "./screens/Login"
 import ResetPass from "./screens/ResetPass"
@@ -19,11 +20,12 @@ import Account from "./screens/Account"
 import Dashboard from "./screens/Dashboard"
 //Requests
 import UserServiceRequest from "./requests/UserServiceRequest"
+//contexts
+import {UserProvider} from "./contexts/UserContext";
 
 class App extends React.Component {
   constructor(props) {
     super(props)
-    toast.configure();
     this.state = {
       auth: null,
       loggedIn: false
@@ -38,13 +40,7 @@ class App extends React.Component {
         flagError = true
       } else {
         if(auth.data && auth.data.token) {
-          toast.success("Bienvenue !", {
-            position: "top-right",
-            autoClose: 3000,
-            closeOnClick: true,
-            pauseOnHover: true,
-          });
-          console.log("keepSession?", keepSession)
+          Toast.show("success", "Bienvenue !");
           if(keepSession) Session.setToken(auth.data.token)
           await this.getUser(auth.data.token)
         } else {
@@ -52,15 +48,7 @@ class App extends React.Component {
         }
       }
       if(flagError) {
-        toast.error(auth.message, {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
+        Toast.show("error", auth.message)
       }
     }
   }
@@ -69,15 +57,7 @@ class App extends React.Component {
     const req = new UserServiceRequest("user/getByToken", "GET", {token: authKey}, authKey)
     const res = await req.execute()
     if(res.error) {
-      toast.error(res.message, {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      Toast.show("error", res.message)
       if(res.message == "Unauthorized") return
     } else {
       if(res.data.id) {
@@ -112,7 +92,6 @@ class App extends React.Component {
           pauseOnHover
         />
         <Switch>
-
           <Route render={({ location }) =>
             this.checkLogin(location, <Games auth={this.state.auth} />)
           } path="/games">
@@ -121,13 +100,17 @@ class App extends React.Component {
             this.checkLogin(location, <Account auth={this.state.auth} />)
           } path="/profile">
           </Route>
-          <Route render={() =>
-            this.state.loggedIn ?
-              !this.state.auth ? 
-                <Loader /> :  
-                <Dashboard auth={this.state.auth} />
-            : <Login auth={this.state.auth} onLogin={(auth,keepSession) => this.onLogin(auth,keepSession)} />
-          } exact path="/" >
+          <Route render={() =>{
+            console.log(this.state.auth)
+            return(
+              this.state.loggedIn ?
+                !this.state.auth ? 
+                  <Loader /> :  
+                  <UserProvider value={this.state.auth}>
+                    <Dashboard user={this.state.auth} />
+                  </UserProvider>
+              : <Login auth={this.state.auth} onLogin={(auth,keepSession) => this.onLogin(auth,keepSession)} />
+            )}} exact path="/" >
           </Route>
           <Route render={(props) => <ResetPass {...props} />} path="/reset-password/:token"></Route>
           <Redirect from="/reset-password/" to="/" />
@@ -135,7 +118,6 @@ class App extends React.Component {
       </Router>
     );
   }
-
 
   checkLogin(location, children) {
     if(this.state.auth) {
