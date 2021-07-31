@@ -14,7 +14,7 @@ const service = {
             allowedHeaders: "*",
         },
 		// Exposed port
-		port: process.env.BROKER_PORT || 3001,
+		port: process.env.API_GATEWAY_BROKER_PORT || 3001,
 		// Exposed IP
 		ip: "0.0.0.0",
 		// Global Express middlewares. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Middlewares

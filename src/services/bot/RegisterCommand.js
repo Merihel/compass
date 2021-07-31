@@ -17,6 +17,7 @@ class RegisterCommand extends AbstractCommand {
             await callService("role.existsByDiscordId", {
                 discord_id: memberTopRole.id
             }, async (res) => {
+                console.log("does exists", res)
                 try {
                     if(!res.data.exists) {
                         dbRole = await callService("role.create", {
@@ -25,15 +26,19 @@ class RegisterCommand extends AbstractCommand {
                             discord_id:memberTopRole.id
                         })
                     } else {
-                        dbRole = await callService("role.find", {query: {discord_id: memberTopRole.id}})
+                        const role = await callService("role.find", {query: {discord_id: memberTopRole.id}})
+                        console.log("ROLE ????", role)
                     }
                 } catch(e) {
                     LOGGER.error(e)
                 }
+            }, (error) => {
+                LOGGER.error(error)
             })
         } else {
             LOGGER.warning("Can't get top role for registering user ! His current top role will not be affected to his DB entry in 'Users'")
         }
+        console.log("DB ROLE ???", dbRole)
         callService("user.existsByDiscordId", {
             discord_id: member.id
         }, async (res) => {
@@ -82,7 +87,7 @@ class RegisterCommand extends AbstractCommand {
                             if (reaction.emoji.name === '👍') {
                                 let clearPassword = Utils.generatePass()
                                 LOGGER.log("Clear password for user: " + clearPassword)
-                                
+                                const resetToken = Utils.createResetToken()
                                 callService("user.create", {
                                     login: member.displayName,
                                     tag: user.tag,
@@ -92,12 +97,12 @@ class RegisterCommand extends AbstractCommand {
                                     bio: null,
                                     clearPassword: clearPassword,
                                     top_role: dbRole ? dbRole.id : null,
-                                    reset_pass: Utils.createResetToken()
-                                    
+                                    reset_pass: resetToken
                                 }, async (res) => {
                                     LOGGER.log("User registered !")
                                     await callService("user.authenticate", {email: email, password: clearPassword}, async (auth) => {
-                                        const link = process.env.SECURE ? "https://":"http://"+process.env.HOST+":"+process.env.PORT+"/account?"+"token="+auth.token
+                                        const secure = process.env.SECURE ? "https://" : "http://"
+                                        const link = secure + process.env.HOST+":"+process.env.PORT+"/reset-password/"+encodeURI(resetToken)
                                         const mailSent = await Mail.send({
                                             from: '"'+this.config.guildName+'" <'+process.env.MAIL_ID+'>', // sender address
                                             to: email, // list of receivers
@@ -110,40 +115,48 @@ class RegisterCommand extends AbstractCommand {
                                                 description: "Ton inscription a bien été validée ! Un email vient d'être envoyé à `" + email + "` avec un lien de connexion :clap: :clap: :clap:"   
                                             })
                                             dmChannel.send(response)
+                                            LOGGER.log("End of register command: Valid register")
                                         } else {
                                             LOGGER.error(mailSent)
                                             const response = Utils.errorEmbedBuilder(mailSent)
                                             dmChannel.send(response)
+                                            LOGGER.log("End of register command: Error on mailSent")
                                         }
                                         dmChannel.stopTyping()
                                     }).catch(e => {
                                         dmChannel.stopTyping()
-                                        LOGGER.error(e)
+                                        LOGGER.error("ERROR", e)
                                         const response = Utils.errorEmbedBuilder(e)
                                         dmChannel.send(response)
+                                        LOGGER.log("End of register command: error catching user.authenticate")
                                     })
                                 }).catch(e => {
                                     dmChannel.stopTyping()
                                     LOGGER.error(e)
                                     const response = Utils.errorEmbedBuilder(e)
                                     dmChannel.send(response)
+                                    LOGGER.log("End of register command: error catching user.create")
                                 })
                             } else {
                                 const response = Utils.messageEmbedBuilder({
                                     title: "❌ Oups !",
                                     color: this.red,
-                                    description: "Retente ta chance :wink:"
+                                    description: "Une erreur est survenue... Retente ta chance avec la commande !register :wink:"
                                 })
+                                LOGGER.log("End of register command: user responded with thumbs down emoji")
                                 dmChannel.send(response)
                             }
                         })
                         .catch(collected => {
+                            console.log(collected)
                             const response = Utils.messageEmbedBuilder({
                                 title: "❌ Oups !",
                                 color: this.red,
                                 description: "Retente ta chance :wink:"
                             })
                             dmChannel.send(response)
+                            LOGGER.log("End of register command: error collecting validation reactions emojis")
+
                         });
                         dmChannel.stopTyping()
                     } catch (e) {
@@ -151,6 +164,7 @@ class RegisterCommand extends AbstractCommand {
                         LOGGER.error(e)
                         const response = Utils.errorEmbedBuilder(e)
                         dmChannel.send(response)
+                        LOGGER.log("End of register command: Generic try catch")
                     }
                 })
                 .catch(collected => {
@@ -162,6 +176,7 @@ class RegisterCommand extends AbstractCommand {
                         description: "Ou bien ton email n'est pas valide, ou bien tu n'as pas été assez rapide ! Retente ta chance :wink:"
                     })
                     dmChannel.send(response)
+                    LOGGER.log("End of register command: wrong email entered")
                 })
             } else {
                 const response = Utils.messageEmbedBuilder({
@@ -170,9 +185,9 @@ class RegisterCommand extends AbstractCommand {
                     description: `Tu existes déjà dans notre base de données, ${member}`
                 })
                 message.channel.send(response)
+                LOGGER.log("End of register command: User already exists in database")
             }
         })
-        LOGGER.log("End of register command")
     }
 }
 

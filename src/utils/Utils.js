@@ -1,10 +1,6 @@
 const bcrypt = require("bcrypt")
 const CryptoJS = require("crypto-js")
-try {
-    const crypto = require("crypto")
-} catch (e) {
-    console.log("Utils imported in ReactJS, can't load crypto")
-}
+const crypto = require("crypto")
 const Discord = require("discord.js")
 
 const utils = {
@@ -18,10 +14,10 @@ const utils = {
         return await bcrypt.compare(password, hash)
     },
     generatePass() {
-        var length = 12,
-            charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+-*/%.",
+        let length = 12,
+            charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
             retVal = "";
-        for (var i = 0, n = charset.length; i < length; ++i) {
+        for (let i = 0, n = charset.length; i < length; ++i) {
             retVal += charset.charAt(Math.floor(Math.random() * n));
         }
         return retVal;
@@ -55,9 +51,17 @@ const utils = {
         return object
     },
     createResetToken() {
-        return CryptoJS.AES.encrypt(crypto.randomBytes(24), crypto.randomBytes(24)).toString()
+        return this.randomString(12) + this.randomString(12)
+    },
+    randomString(length) {
+        let result = '';
+        let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let charactersLength = characters.length;
+        for (let i = 0; i < length; i++) {
+            result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        }
+        return result;
     }
-
 }
 
 module.exports = utils

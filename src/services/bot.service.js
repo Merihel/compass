@@ -112,7 +112,7 @@ client.once('disconnect', () => {
 
 async function callService(serv, args = null, callback = null) {
     await context.call(serv, args).then(res => {
-        //LOGGER.log("callService res", res)
+        //LOGGER.log("callService res: " + JSON.stringify(res))
         return callback ? callback(res) : res
     })
 }
@@ -134,7 +134,7 @@ updateUser = async (message) => {
     const member = await message.member
     const user = await message.author
     await callService("user.find", {query: {discord_id: member.id}}, async (res) => {
-        if(res) {
+        if(res && res.length > 0) {
             if(DateUtil.compareWithNow(res[0].updatedAt) > 3) {
                 doUpdate = true
                 dbUser = res[0]
@@ -205,25 +205,32 @@ roleChecker = (message, checkedRole, isCommand = true) => {
 }
 
 client.on('message', async message => {
-    if (message.author.bot || !message.content.startsWith(pre)) {
-        if(!message.author.bot) {
-            //todo antispam for "everyone" role ! (antilink)
-            const member = message.member
-            const memberTopRole = RoleManager.getHighestRoleFromDiscordMember(member)
-            if(memberTopRole.id === guildId) {
-                if(Antispam.checkForLinks(message)) {
-                    message.delete({timeout:100})
+    if (message.author.bot) {
+        if(!message.content.startsWith(pre)) {
+            if(!message.author.bot) {
+                //todo antispam for "everyone" role ! (antilink)
+                const member = message.member
+                const memberTopRole = RoleManager.getHighestRoleFromDiscordMember(member)
+                if(!memberTopRole) {
+                    notCommand(message)
+                    return
+                }
+                if(memberTopRole.id === guildId) {
+                    if(Antispam.checkForLinks(message)) {
+                        message.delete({timeout:100})
+                    }
+                }
+                const checkedRole = RoleManager.checkRole(memberTopRole.id, 3)
+                if(!roleChecker(message, checkedRole, false)) {
+                    if(Antispam.checkForSpam(message.content, message.member.id)) {
+                        punishSpam(message, message.member)
+                    }
                 }
             }
-            const checkedRole = RoleManager.checkRole(memberTopRole.id, 3)
-            if(!roleChecker(message, checkedRole, false)) {
-                if(Antispam.checkForSpam(message.content, message.member.id)) {
-                    punishSpam(message, message.member)
-                }
-            }
+        } else {
+            notCommand(message)
+            return
         }
-        notCommand(message)
-        return
     }
     if(commandsOnlyInSpecificChannel) {
         if(message.channel.id !== commandChannel) {

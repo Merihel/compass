@@ -26,7 +26,9 @@ As frontend framework
  2. `npm install` or `yarn` to install Node dependencies
  3. To the root of the project, add a `.env` file with following content :  
 
-    **JWT_SECRET**  a secret key for the JWT  
+	**NODE_ENV** the node environment. If set to `development` it will be set  
+
+    **JWT_SECRET** a secret key for the JWT  
 
 	**BOT_TOKEN** your discord bot token (see https://discord.com/developers/applications)  
 
@@ -34,7 +36,13 @@ As frontend framework
 
 	**HOST** *(for website)* the host (ip or domain name)  
 
-	**WEB_PORT** *(for website)* the port in use  
+	**REACT_APP_BROKER_HOST** the host for the main Moleculer broker
+	
+	**REACT_APP_BROKER_PORT** the port for the main Moleculer broker
+
+	**API_GATEWAY_BROKER_PORT** the port for the Moleculer Api Gateway broker
+
+	**PORT** *(for website)* the port for the React server
 
 	**MAIL_HOST** *(mail config)* the host of the mail server  
 
@@ -52,6 +60,8 @@ As frontend framework
 
 	**DB_HOST** *(db config)* the database host  
 
+	**RESTART_PASS** secret password for the `broker.restart` action (`GET broker/restart` on API) route that restart the bot. It needs to be passed as a parameter in `pass`.
+
 4. Add a `config.json` at the root of the project with an object containing following key/values :  
 
 	**pre** the Discord bot command prefixe  
@@ -59,6 +69,10 @@ As frontend framework
     **guildName** the Discord guild name  
 
 	**guildId** the Discord guild id  
+
+	**commandsOnlySpecificChannel** *(boolean)* set to `true` to make commands available only in one channel (set in next config var)
+
+	**commandChannel** if `commandsOnlySpecificChannel` is `true`, enter the id of the channel for bot commands
 
 	**roles** An array containing roles. Roles are object with following properties:
 
